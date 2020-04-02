@@ -1,3 +1,8 @@
+target
+
+# stop from showing up on Untracked files list
+integration-tests/src/test
+
 # Compiled class file
 *.class
 
