@@ -3,17 +3,32 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.jboss.resteasy</groupId>
-  <artifactId>integration-tests</artifactId>
+
+  <parent>
+    <groupId>org.jboss.resteasy</groupId>
+    <artifactId>resteasy-quarkus-testsuite</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <!--
   <version>1.0-SNAPSHOT</version>
+  <groupId>org.jboss.resteasy</groupId>
+  -->
+  <artifactId>integration-tests</artifactId>
+
 
   <properties>
+    <!-- tmp from parent pom.xml
     <compiler-plugin.version>3.8.1</compiler-plugin.version>
     <maven.compiler.parameters>true</maven.compiler.parameters>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    -->
+
+
     <!--
     <quarkus-plugin.version>1.2.0.Final</quarkus-plugin.version>
         <quarkus-plugin.version>1.3.1.Final</quarkus-plugin.version>
@@ -37,8 +52,9 @@
     <!-- ############# properties added to orig ############## -->
     <!--
 <resteasy-version>4.5.0-SNAPSHOT</resteasy-version>
--->
 <resteasy-version>4.6.0-SNAPSHOT</resteasy-version>
+-->
+
 
     <dep.arquillian-bom.version>1.4.1.Final</dep.arquillian-bom.version>
     <javax.servlet-api-version>3.1.0</javax.servlet-api-version>
