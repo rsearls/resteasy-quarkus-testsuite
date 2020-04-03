@@ -60,9 +60,8 @@ Currently (Apr 3, 2020) they as follows.
 ## Building the Project
 
 * The initial installation of the test files can be accomplished several ways.
-    * **'mvn initialize'**        unpacks the zip achive only.
-    * **'mvn clean install -DskipTests'**     upacks the zip achive, 
-        compiles the classes, does not run the tests.
+    * **'mvn clean initialize'**  unpacks the zip achive.
+    * **'mvn clean install'**     unpacks the zip achive only.
 
 ## Running the Tests
 Tests can be run from the project root directory or from within directory
