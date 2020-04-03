@@ -82,17 +82,16 @@ Occasionally there is a failure during the compiling process.  Currently
 little helpful information is provided.  To further debug the issue it is
 desirable to debug the maven plugin.  To do this define the _MAVEN_OPTS_
 environment variable as below.  Set the jdwp address to the desired remote 
-debugger port number.  Run the execution command above and attach the remote 
-debugger to the running process.  
+debugger port number.    
 * **export MAVEN_OPTS="-agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=y"**      
 
-
+Run the test and attach the remote debugger to the running process.
+* **mvn test -P test-exclusion'**
 
 ## Test Code Changes
 If a RESTEasy test file requires a change.  The change will need to be implemented 
 in RESTEasy's _integration-tests_ module.  Please file a RESTEasy jira 
-for the change.  
-https://issues.redhat.com/projects/RESTEASY/issues
+for the change.  https://issues.redhat.com/projects/RESTEASY/issues
 
 Test failures identified to be a quarkus issue should be filed with quarkus.
 https://github.com/quarkusio/quarkus/issues/
