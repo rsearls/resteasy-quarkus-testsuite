@@ -1,0 +1,14 @@
+## future task; get this running
+install:
+ - mvn -B clean initialize; java -version
+script:
+ - travis_wait 60 mvn -B -fae test
+
+language: java
+jdk:
+  - openjdk11
+
+addons:
+  hosts:
+    - localhost.localdomain
+
