@@ -45,7 +45,9 @@
     <version.log4j>2.10.0</version.log4j>
     <version.io.undertow>2.0.23.Final</version.io.undertow>
     <version.eclipse.jdt>3.5.0</version.eclipse.jdt>
+    <!-- obsolete
     <version.testng>6.9.9</version.testng>
+    -->
     <version.org.jboss.resteasy.tracing.api>1.0.0.Beta4</version.org.jboss.resteasy.tracing.api>
     <version.com.fasterxml.jackson>2.10.1</version.com.fasterxml.jackson>
     <version.org.wildfly.extras.creaper>1.6.1</version.org.wildfly.extras.creaper>
@@ -270,18 +272,10 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-undertow</artifactId>
     </dependency>
-
-    <!-- required for annotation org/testng/annotations/BeforeClass in arquillian -->
+    
     <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <version>${version.testng}</version>
-    </dependency>
-
-<!-- required for individual tests to be run -->
-    <dependency>
-      <groupId>org.jboss.arquillian.testng</groupId>
-      <artifactId>arquillian-testng-container</artifactId>
+      <groupId>org.jboss.arquillian.junit</groupId>
+      <artifactId>arquillian-junit-container</artifactId>
       <version>${dep.arquillian-bom.version}</version>
     </dependency>
 
@@ -437,6 +431,7 @@
             <version>${surefire-plugin.version}</version>
             <configuration>
               <systemProperties>
+                <trimStackTrace>false</trimStackTrace>
                 <quarkus.tester>true</quarkus.tester> <!-- required for PortProviderUtil -->
                 <org.jboss.resteasy.port>8081</org.jboss.resteasy.port>
                 <java.io.tmpdir>${project.build.directory}</java.io.tmpdir>

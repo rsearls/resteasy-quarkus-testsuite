@@ -41,10 +41,6 @@ It only removes the _target_ directories.
 Two maven profiles have been defined in this project.
 * **testing-default**: is the default profile.  It runs if no profile is 
     specified on the command-line.  This profile runs all the tests.
-    Currently the quarkus execution environment interfers with the printing 
-    of each surefire test statistic.  There is no way to know which test passed
-    and which failed.
-    https://github.com/quarkusio/quarkus/issues/7122
 * **test-exclusion**: is provided to allow running of individual tests.
     It uses the _maven-surefire-plugin_ excludes configuration feature.
     The user will need to edit the _integration-tests/pom.xml_ file
