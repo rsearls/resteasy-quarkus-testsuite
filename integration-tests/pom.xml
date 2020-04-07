@@ -427,8 +427,8 @@
             <artifactId>maven-surefire-plugin</artifactId>
             <version>${surefire-plugin.version}</version>
             <configuration>
+              <trimStackTrace>false</trimStackTrace>
               <systemProperties>
-                <trimStackTrace>false</trimStackTrace>
                 <quarkus.tester>true</quarkus.tester> <!-- required for PortProviderUtil -->
                 <org.jboss.resteasy.port>8081</org.jboss.resteasy.port>
                 <java.io.tmpdir>${project.build.directory}</java.io.tmpdir>
@@ -449,6 +449,7 @@
             <artifactId>maven-surefire-plugin</artifactId>
             <version>${surefire-plugin.version}</version>
             <configuration>
+              <trimStackTrace>false</trimStackTrace>
               <systemProperties>
                 <quarkus.tester>true</quarkus.tester> <!-- required for PortProviderUtil -->
                 <org.jboss.resteasy.port>8081</org.jboss.resteasy.port>
