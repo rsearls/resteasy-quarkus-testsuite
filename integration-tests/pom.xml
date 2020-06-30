@@ -21,23 +21,26 @@
     <quarkus-plugin.version>1.2.0.Final</quarkus-plugin.version>
         <quarkus-plugin.version>1.3.1.Final</quarkus-plugin.version>
         <quarkus-plugin.version>1.3.0.Final</quarkus-plugin.version>
+        <quarkus-plugin.version>1.3.1.Final</quarkus-plugin.version>
     -->
-    <quarkus-plugin.version>1.3.1.Final</quarkus-plugin.version>
+    <quarkus-plugin.version>1.6.0.CR1</quarkus-plugin.version>
 
     <!--
     <quarkus.platform.version>1.2.0.Final</quarkus.platform.version>
     <quarkus.platform.version>1.3.0.Alpha1</quarkus.platform.version>
     <quarkus.platform.version>999-SNAPSHOT</quarkus.platform.version>
+    <quarkus.platform.version>1.3.1.Final</quarkus.platform.version>
   -->
-     <quarkus.platform.version>1.3.1.Final</quarkus.platform.version>
+     <quarkus.platform.version>1.6.0.CR1</quarkus.platform.version>
 
     <surefire-plugin.version>2.22.1</surefire-plugin.version>
 
     <!-- ############# properties added to orig ############## -->
     <!--
       <resteasy-version>4.5.0-SNAPSHOT</resteasy-version>
+      <resteasy-version>4.6.0-SNAPSHOT</resteasy-version>
       -->
-    <resteasy-version>4.6.0-SNAPSHOT</resteasy-version>
+    <resteasy-version>4.5.5.Final</resteasy-version>
 
     <dep.arquillian-bom.version>1.4.1.Final</dep.arquillian-bom.version>
     <javax.servlet-api-version>3.1.0</javax.servlet-api-version>
@@ -84,6 +87,17 @@
   </dependencyManagement>
 
   <dependencies>
+
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-mutiny</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-resteasy-mutiny</artifactId>
+    </dependency>
+
+
 
     <dependency>
       <groupId>org.hibernate.javax.persistence</groupId>
@@ -466,9 +480,9 @@
                       8 tests failed
                         - 6 use web.xml
                      ################################################## -->
-                <!-- run passing test
+                <!-- run passing test -->
                 <exclude>org/jboss/resteasy/test/core/basic/ByeTest.java</exclude>
-            -->
+
                 <exclude>org/jboss/resteasy/test/core/basic/ApplicationPropertiesConfigTest.java</exclude>
                 -->
                 <exclude>org/jboss/resteasy/test/core/basic/PrivateConstructorTest.java</exclude>
@@ -740,6 +754,7 @@
                          12 tests ran successfully
                          1 tests failed
                   ################################################## -->
+                <exclude>org/jboss/resteasy/test/stream/EntityInputStreamTest.java</exclude>
                 <exclude>org/jboss/resteasy/test/stream/StreamRawFlowableRxJava2Test.java</exclude>
                 <exclude>org/jboss/resteasy/test/stream/StreamRawObservableRxJava2Test.java</exclude>
                 <!-- fails todo (Multiple classes with @ApplicationPath which is currently not supported)
@@ -1239,7 +1254,8 @@
                         java.net.BindException: Address already in use)
                 --><exclude>org/jboss/resteasy/test/validation/cdi/MultipleWarTest.java</exclude>
                 <!-- --><exclude>org/jboss/resteasy/test/validation/cdi/ApplicationScopeValidationTest.java</exclude>
-
+                <exclude>org/jboss/resteasy/test/validation/ejb/EJBParameterViolationsOnlyTest.java</exclude>
+                <exclude>org/jboss/resteasy/test/providers/jackson2/whitelist/WhiteListPolymorphicTypeValidatorManualOverrideTest.java</exclude>
 
                 <!-- ############## resource  ####################
                   dir: org/jboss/resteasy/test/resource
