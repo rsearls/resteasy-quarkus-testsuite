@@ -17,8 +17,12 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
+    <!-- todo quarkus bom using resteasy 4.5.6.Final which is not up to date
+          with 4.6.0-SNAPSHOT
     <resteasy-version>4.6.0-SNAPSHOT</resteasy-version>
+    <resteasy-version>4.5.6.Final</resteasy-version>
+    -->
+    <resteasy-version>4.5.8.Final</resteasy-version>
   </properties>
 
   <modules>
@@ -27,6 +31,7 @@
 
   <build>
     <plugins>
+      
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
@@ -52,6 +57,50 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>3.0.0</version>
+        <executions>
+          <execution>
+            <phase>initialize</phase>
+            <!--
+            <phase>generate-sources</phase>
+            -->
+            <configuration>
+              <target>
+                <ant antfile="${basedir}/build.xml">
+                  <target name="init"/>
+                </ant>
+            </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>3.1.0</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>${project.basedir}/integration-tests</directory>
+              <includes>
+                <include>src/**</include>
+                <include>client-config-provider-test.jar</include>
+                <inclue>target</inclue>
+              </includes>
+              <excludes>
+                <exclude>pom.xml</exclude>
+              </excludes>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
+          </filesets>
+        </configuration>
       </plugin>
     </plugins>
   </build>

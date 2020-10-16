@@ -1,0 +1,113 @@
+<project name="resteasy-quarkus-testsuite" default="init" basedir=".">
+
+   <target name="init" depends="AsyncFuture, MultDeployments, unzipUtil"/>
+
+   <target name="unzipTests">
+      <unzip dest="${basedir}/integration-tests"
+             src="lib/resteasy-integration-tests-4.5.6.Final-sources.zip"/>
+   </target>
+
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   <target name="AsyncFuture" depends="ZipAsyncFuture, DeleteAsyncFuture">
+      <!-- backup and remove tests that use AsyncFuture -->
+   </target>
+
+   <fileset id="filesAsyncFuture"
+         dir="."
+         includes="integration-tests/src/test/java/org/jboss/resteasy/test/client/EntityBufferingInFileTest.java
+         integration-tests/src/test/java/org/jboss/resteasy/test/client/RxInvokerTest.java
+         integration-tests/src/test/java/org/jboss/resteasy/test/client/TraceTest.java
+         integration-tests/src/test/java/org/jboss/resteasy/test/core/logging/DebugLoggingTest.java
+         integration-tests/src/test/java/org/jboss/resteasy/test/cdi/injection/InjectionTest.java
+         integration-tests/src/test/java/org/jboss/resteasy/test/cdi/injection/ReverseInjectionTest.java
+         integration-tests/src/test/java/org/jboss/resteasy/test/cdi/injection/MDBInjectionTest.java
+         integration-tests/src/test/java/org/jboss/resteasy/test/client/resource/TraceResource.java
+         integration-tests/src/test/java/org/jboss/resteasy/test/warning/SubResourceWarningTest.java"/>
+
+   <target name="ZipAsyncFuture">
+      <zip destfile="${basedir}/tests-AsyncFuture.zip">
+         <fileset refid="filesAsyncFuture" />
+      </zip>
+   </target>
+
+   <target name="DeleteAsyncFuture">
+      <delete>
+         <fileset refid="filesAsyncFuture"/>
+      </delete>
+   </target>
+
+
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   <target name="MultDeployments" depends="ZipMultDeployments, DeleteMultDeployments">
+      <!-- backup and remove tests that deploy multiple archives -->
+   </target>
+
+   <fileset id="filesMultDeployments"
+            dir="."
+            includes="integration-tests/src/test/java/org/jboss/resteasy/test/xxe/XxeSecureProcessingTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/xxe/XxeJaxbTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/microprofile/restclient/RestClientProxyRedeployTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/providers/multipart/InputPartDefaultCharsetOverwriteTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/security/TwoSecurityDomainsTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/validation/cdi/MultipleWarTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/gzip/AllowGzipOnServerAbstractTestBase.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/gzip/NotAllowGzipOnServerAbstractTestBase.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/providers/custom/ReaderWriterTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/providers/html/HtmlSanitizerOptionalTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/providers/jackson2/Jackson2Test.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/providers/jackson2/JacksonDatatypeTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/providers/jackson2/PreferJacksonOverJsonBClientTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/KeepCharsetTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/xxe/XXEBasicTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/DefaultCharsetTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/resource/patch/StudentPatchTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/xxe/ExternalParameterEntityTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/xxe/SecureProcessingTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/xxe/SecureProcessing2Test.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/gzip/AllowGzipOnServerAllowGzipOnClientTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/providers/multipart/resource/InputPartDefaultCharsetOverwriteContentTypeNoCharsetUTF8.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/providers/html/resource/HtmlSanitizerOptionalResource.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/providers/multipart/resource/InputPartDefaultCharsetOverwriteContentTypeCharsetUTF8.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/gzip/AllowGzipOnServerNotAllowGzipOnClientTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/providers/multipart/resource/InputPartDefaultCharsetOverwriteContentTypeCharsetUTF16.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/providers/multipart/resource/InputPartDefaultCharsetOverwriteContentTypeNoCharsetUTF16.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/gzip/NotAllowGzipOnServerAllowGzipOnClientTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/gzip/NotAllowGzipOnServerNotAllowGzipOnClientTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/providers/multipart/resource/InputPartDefaultCharsetOverwriteNoContentTypeCharsetUTF8.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/providers/multipart/resource/InputPartDefaultCharsetOverwriteNoContentTypeCharsetUTF16.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/GenericResourceTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/providers/jackson2/ExceptionMapperMarshalTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/providers/jackson2/ProxyWithGenericReturnTypeJacksonTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/validation/ValidationNullErrorValueTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/validation/ValidationJaxbTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/validation/ValidationExceptionsTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/validation/ValidationComplexTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/validation/ValidateOnExecutionTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/validation/ResteasyViolationExceptionRepresentationTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/validation/PathSuppressionTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/validation/ResteasyViolationExceptionRepresentationTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/security/SecurityContextTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/response/ResponseTrimmingTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/resource/path/UriParamsWithLocatorTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/UriInfoTest.java
+            integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/MediaTypeFromMessageBodyWriterTest.java"/>
+
+   <target name="ZipMultDeployments">
+      <zip destfile="${basedir}/tests-MultDeployments.zip">
+         <fileset refid="filesMultDeployments" />
+      </zip>
+   </target>
+
+   <target name="DeleteMultDeployments">
+      <delete>
+         <fileset refid="filesMultDeployments" />
+      </delete>
+   </target>
+
+
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   <target name="unzipUtil">
+      <!-- provide utility for heapdump -->
+      <unzip dest="${basedir}" src="lib/util-HeapDump.zip"/>
+   </target>
+</project>

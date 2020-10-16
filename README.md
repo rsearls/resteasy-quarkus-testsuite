@@ -33,8 +33,8 @@ not unpack and overwrite the test files from a previous run. This
 is to ensure changes you make locally will not be overwritten 
 in successive runs. 
 
-Command **'mvn clean'** does not remove the files from _integration-tests/src/test_.
-It only removes the _target_ directories.
+Command **'mvn clean'** removes the files from _integration-tests/src/test_
+as well as the _target_ directories.
 
 
 ## Project Profiles
@@ -71,7 +71,7 @@ To debug individual tests use the _test-exclusion_ profile in conjunction with
 surefire flag _-Dmaven.surefire.debug_.  In your IDE set breakpoints
 and configure a remote debugger for port 5005.  Edit the exclude list in
 profile _test-exclusion_ and run the test as follows.
-* **mvn test -P test-exclusion -Dmaven.surefire.debug'**  
+* **'mvn test -P test-exclusion -Dmaven.surefire.debug'**  
 
 Occasionally there is a failure during the compiling process.  Currently
 little helpful information is provided.  To further debug the issue it is
