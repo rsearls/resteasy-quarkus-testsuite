@@ -16,39 +16,66 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+<!-- rls Sep 14
     <quarkus-plugin.version>1.6.0.Final</quarkus-plugin.version>
     <quarkus.platform.version>1.6.0.Final</quarkus.platform.version>
+
+    <quarkus-plugin.version>1.7.3.Final</quarkus-plugin.version>
+    <quarkus-plugin.version>1.8.2.Final</quarkus-plugin.version>
+
+    <quarkus.platform.version>1.8.0.Final</quarkus.platform.version>
+    <quarkus.platform.version>1.8.2.Final</quarkus.platform.version>
+-->
+    <quarkus-plugin.version>1.9.0.Final</quarkus-plugin.version>
+    <quarkus.platform.version>1.9.0.Final</quarkus.platform.version>
 
     <surefire-plugin.version>2.22.1</surefire-plugin.version>
 
     <!-- ############# properties added to orig ############## -->
-    <!--
+    <!-- todo quarkus bom using resteasy 4.5.6.Final which is not up to date
+          with 4.6.0-SNAPSHOT
       <resteasy-version>4.6.0-SNAPSHOT</resteasy-version>
-      -->
-    <resteasy-version>4.5.5.Final</resteasy-version>
+      <resteasy-version>4.5.6.Final</resteasy-version>
+    -->
+    <resteasy-version>4.5.8.Final</resteasy-version>
 
+    <!--
     <dep.arquillian-bom.version>1.4.1.Final</dep.arquillian-bom.version>
+    -->
+    <dep.arquillian-bom.version>1.6.0.Final</dep.arquillian-bom.version>
     <javax.servlet-api-version>3.1.0</javax.servlet-api-version>
     <jboss-servlet-api_4.0_spec-version>2.0.0.Final</jboss-servlet-api_4.0_spec-version>
     <version.log4j>2.13.3</version.log4j>
-    <version.io.undertow>2.0.23.Final</version.io.undertow>
-    <version.eclipse.jdt>3.5.0</version.eclipse.jdt>
+    <version.io.undertow>2.0.23.Final</version.io.undertow>  <!-- still need?? -->
+    <version.eclipse.jdt>3.5.0</version.eclipse.jdt>  <!-- still need?? -->
     <version.org.jboss.resteasy.tracing.api>1.0.0.Beta4</version.org.jboss.resteasy.tracing.api>
     <version.com.fasterxml.jackson>2.10.1</version.com.fasterxml.jackson>
     <version.org.wildfly.extras.creaper>1.6.1</version.org.wildfly.extras.creaper>
+    <!--
     <version.jboss.dmr>1.5.0.Final</version.jboss.dmr>
+    -->
+    <version.jboss.dmr>1.5.1.Final</version.jboss.dmr>
     <version.wildfly.controller.client>7.0.0.Final</version.wildfly.controller.client>
-
+    <!--
     <version.jboss.threads>3.0.1.Final</version.jboss.threads>
-
+    -->
+    <version.jboss.threads>3.2.0.Final</version.jboss.threads>
     <version.wildfly.arquillian.common>2.2.0.Final</version.wildfly.arquillian.common>
+
     <version.jboss.ejb.spec>2.0.0.Final</version.jboss.ejb.spec>
     <version.org.eclipse.aether>1.1.0</version.org.eclipse.aether>
     <version.org.jboss.spec.javax.el.jboss-el-api_3.0_spec>2.0.0.Final</version.org.jboss.spec.javax.el.jboss-el-api_3.0_spec>
-    <version.jakarta.validation-api>2.0.2</version.jakarta.validation-api>
+    <version.jakarta.validation-api>2.0.2</version.jakarta.validation-api> <!-- still need?? -->
+    <!--
     <version.org.glassfish.jakarta.el>3.0.2</version.org.glassfish.jakarta.el>
+    -->
+    <version.org.glassfish.jakarta.el>3.0.3</version.org.glassfish.jakarta.el>
+    <!--
     <version.org.hibernate.javax.persistence.hibernate-jpa-2.1-api>1.0.0.Final</version.org.hibernate.javax.persistence.hibernate-jpa-2.1-api>
+    -->
+    <version.org.hibernate.javax.persistence.hibernate-jpa-2.1-api>1.0.2.Final</version.org.hibernate.javax.persistence.hibernate-jpa-2.1-api>
     <version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec>2.0.0.Final</version.org.jboss.spec.javax.jms.jboss-jms-api_2.0_spec>
+    <version.hibernate.validator>6.0.18.Final</version.hibernate.validator>
   </properties>
 
   <dependencyManagement>
@@ -83,7 +110,12 @@
     </dependency>
 
 
-
+    <dependency>
+      <groupId>org.hibernate.validator</groupId>
+      <artifactId>hibernate-validator</artifactId>
+      <version>${version.hibernate.validator}</version>
+    </dependency>
+    
     <dependency>
       <groupId>org.hibernate.javax.persistence</groupId>
       <artifactId>hibernate-jpa-2.1-api</artifactId>
@@ -301,6 +333,7 @@
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-client</artifactId>
+      <version>${resteasy-version}</version>
     </dependency>
 
     <!-- todo 2    Apr2  reenable this.  Need current resteasy version not quarkus BOM version -->
@@ -373,13 +406,7 @@
       <artifactId>jakarta.servlet-api</artifactId>
       <version>5.0.0-M1</version>
     </dependency>
-    <!-- replace by jakarta.servlet-api
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-      <version>3.1.0</version>
-    </dependency>
--->
+
     <!-- during compile io.quarkus.creator.curator.Curator recommends
     replaced javax.inject:javax.inject with jakarta.inject:jakarta.inject-api
     replaced javax.servlet:javax.servlet-api with jakarta.servlet:jakarta.servlet-api
@@ -426,6 +453,7 @@
             <artifactId>maven-surefire-plugin</artifactId>
             <version>${surefire-plugin.version}</version>
             <configuration>
+              <runOrder>reversealphabetical</runOrder>
               <trimStackTrace>false</trimStackTrace>
               <systemProperties>
                 <quarkus.tester>true</quarkus.tester> <!-- required for PortProviderUtil -->
@@ -742,7 +770,9 @@
                          1 tests failed
                   ################################################## -->
                 <exclude>org/jboss/resteasy/test/stream/EntityInputStreamTest.java</exclude>
+                <!--  -->
                 <exclude>org/jboss/resteasy/test/stream/StreamRawFlowableRxJava2Test.java</exclude>
+
                 <exclude>org/jboss/resteasy/test/stream/StreamRawObservableRxJava2Test.java</exclude>
                 <!-- fails todo (Multiple classes with @ApplicationPath which is currently not supported)
                       org.jboss.arquillian.core.impl.ObserverImpl 89
@@ -787,7 +817,7 @@
                 --><exclude>org/jboss/resteasy/test/core/smoke/WireSmokeTest.java</exclude>
 
                 <exclude>org/jboss/resteasy/test/client/ClientDynamicFeaturesTest.java</exclude>
-                <!-- fails todo (No @RunAsClient present in test)
+                <!-- ALWAYS exclude.  No way to write server.log for checking
                 --><exclude>org/jboss/resteasy/test/client/ClientBuilderTest.java</exclude>
 
                 <exclude>org/jboss/resteasy/test/client/NullEntityTest.java</exclude>
@@ -802,7 +832,8 @@
 
                 <!-- --><exclude>org/jboss/resteasy/test/client/InputStreamTest.java</exclude>
 
-                <exclude>org/jboss/resteasy/test/client/PrimitiveTest.java</exclude>
+               <!-- --><exclude>org/jboss/resteasy/test/client/PrimitiveTest.java</exclude>
+
                 <exclude>org/jboss/resteasy/test/client/SmokeParamTest.java</exclude>
                 <exclude>org/jboss/resteasy/test/client/ClientCacheInterceptorTest.java</exclude>
                 <!-- fails todo (There is no path value in url)
@@ -827,7 +858,8 @@
 
                 <!-- --><exclude>org/jboss/resteasy/test/client/ChunkedTransferEncodingTest.java</exclude>
 
-                <exclude>org/jboss/resteasy/test/client/InputStreamResourceTest.java</exclude>
+                <!--  --><exclude>org/jboss/resteasy/test/client/InputStreamResourceTest.java</exclude>
+
                 <exclude>org/jboss/resteasy/test/client/ClientCacheTest.java</exclude>
                 <!-- fails todo (not able to resolve version issues for org.jboss.threads:jboss-threads)
                 --><exclude>org/jboss/resteasy/test/client/TraceTest.java</exclude>
@@ -839,9 +871,12 @@
 
                 <exclude>org/jboss/resteasy/test/client/ClientProviderTest.java</exclude>
                 <exclude>org/jboss/resteasy/test/client/ClientResponseWithEntityTest.java</exclude>
-                <exclude>org/jboss/resteasy/test/client/GenericReturnTypeTest.java</exclude>
+                <!--
+                --><exclude>org/jboss/resteasy/test/client/GenericReturnTypeTest.java</exclude>
+
                 <exclude>org/jboss/resteasy/test/client/ClientCookieTest.java</exclude>
-                <!-- OK (tagged not a functioning test)--> <exclude>org/jboss/resteasy/test/client/AsyncBenchTest.java</exclude>
+                <!-- OK (tagged not a functioning test) -->
+                <exclude>org/jboss/resteasy/test/client/AsyncBenchTest.java</exclude>
 
                 <exclude>org/jboss/resteasy/test/client/WebTargetTest.java</exclude>
 
@@ -876,7 +911,8 @@
 
                 <exclude>org/jboss/resteasy/test/client/proxy/ProxyCastingSimpleTest.java</exclude>
 
-                <exclude>org/jboss/resteasy/test/client/exception/UnauthorizedExceptionTest.java</exclude>
+                <!-- --><exclude>org/jboss/resteasy/test/client/exception/UnauthorizedExceptionTest.java</exclude>
+
                 <exclude>org/jboss/resteasy/test/client/exception/ClientExceptionsTest.java</exclude>
                 <!-- fails todo (No path set in test testMethodNotAllowed)
                 --><exclude>org/jboss/resteasy/test/client/exception/ClientErrorTest.java</exclude>
@@ -892,7 +928,7 @@
                     SEE LINE 356 in test)
                --><exclude>org/jboss/resteasy/test/client/other/ApacheHttpClient43Test.java</exclude>
 
-                <exclude>org/jboss/resteasy/test/client/other/CustomHttpClientEngineTest.java</exclude>
+                <!-- --><exclude>org/jboss/resteasy/test/client/other/CustomHttpClientEngineTest.java</exclude>
 
 
 
@@ -1035,6 +1071,7 @@
                 --><exclude>org/jboss/resteasy/test/providers/multipart/InputPartDefaultCharsetOverwriteTest.java</exclude>
 
                 <!-- --><exclude>org/jboss/resteasy/test/providers/multipart/ContextProvidersTest.java</exclude>
+
                 <!-- --><exclude>org/jboss/resteasy/test/providers/multipart/GenericTypeMultipartTest.java</exclude>
                 <!-- --><exclude>org/jboss/resteasy/test/providers/multipart/ProxyTest.java</exclude>
                 <!-- --><exclude>org/jboss/resteasy/test/providers/sse/SseSmokeTest.java</exclude>
@@ -1723,7 +1760,13 @@
                 <!--
                     <exclude>org/jboss/resteasy/test/validation/**</exclude>
               -->
-
+                <exclue>org/jboss/resteasy/test/client/HeaderEmptyHostTest.java</exclue>
+                <exclue>org/jboss/resteasy/test/asynch/AsyncTimeoutTest.java</exclue>
+                <exclue>org/jboss/resteasy/test/microprofile/restclient/RestClientProviderPriorityTest.java</exclue>
+                <exclude>org/jboss/resteasy/test/providers/multipart/ComplexMultipartOutputTest.java</exclude>
+                <exclude>org/jboss/resteasy/test/providers/multipart/SoupMultipartMsgTest.java</exclude>
+                <exclude>org/jboss/resteasy/test/providers/sse/SseAPITest.java</exclude>
+                <exclude>org/jboss/resteasy/test/validation/ManagedBeanValidationTest.java</exclude>
               </excludes>
             </configuration>
 

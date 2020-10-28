@@ -1,0 +1,16 @@
+
+-- Oct 16, 2020
+- Quarkus 1.8.2 has a memory leak.  An OutOfMemoryError occurs about 195 tests
+       into the test set (479 test files).  From a heapdump the offending
+       object is io.quarkus.bootstrap.classloading.QuarkusClassLoader.
+- Must use JDK 8 version with quarkus 1.8.2.Final to avoid failure do to
+    jdk-9 org.apache.logging.log4j.util.StackLocator$FqcnCallerLocator issue.
+- quarkus 1.8.2.Final BOM uses RESTEasy 4.5.6.Final. Resteasy version set
+        in ./pom.xml and integration-tests/pom.xml
+- quarkus 1.8.2.Final BOM declares org.jboss.threads:jboss-threads:3.2.0.Final
+        RESTEasy by way of wfly uses org.jboss.threads:jboss-threads:2.3.2.Final.
+        Version org.jboss.threads:jboss-threads:3.2.0.Final no longer contains
+        org.jboss.threads.AsyncFuture, hence several RESTEasy tests fail.
+        Only solution is to remove those tests because the failures cause a
+        "java.net.BindException: Address already in use" of subsequent tests.
+

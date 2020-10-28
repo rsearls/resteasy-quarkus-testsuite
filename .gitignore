@@ -27,7 +27,7 @@ integration-tests/src/test
 *.war
 *.nar
 *.ear
-*.zip
+# *.zip
 *.tar.gz
 *.rar
 
