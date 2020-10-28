@@ -1,3 +1,9 @@
+-- Oct 28, 2020
+- Quarkus 1.9.0.Final has a memory leak.  An OutOfMemoryError occurs about 183 tests
+        into the test set (441 test files).  From a heapdump the offending
+        object is io.quarkus.bootstrap.classloading.QuarkusClassLoader.
+   # This project has been configured to force a heapDump by test, ContextProvidersTest,
+     because settings as a system property and in maven were ignored.
 
 -- Oct 16, 2020
 - Quarkus 1.8.2 has a memory leak.  An OutOfMemoryError occurs about 195 tests
