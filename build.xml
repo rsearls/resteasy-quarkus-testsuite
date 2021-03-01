@@ -1,6 +1,30 @@
-<project name="resteasy-quarkus-testsuite" default="init" basedir=".">
+<project name="resteasy-quarkus-testsuite" default="setupPassingTests" basedir=".">
 
-   <target name="init" depends="AsyncFuture, MultDeployments, unzipUtil"/>
+   <!-- These tests contain elements quarkus does not currently support.
+        Remove them from the test set.
+    -->
+   <target name="removeUnsupported"
+           depends="AsyncFuture, MultiDeployments, AnnotTargetsContainer, MultiApplicationPath, CdiQualifiers, JsonAnnotations"/>
+
+   <!-- Remove all but tests that are know to pass.  This enables identifying regressions -->
+   <target name="setupPassingTests"
+           depends="removeUnsupported, TestFailures, TestErrors, LinkageError"/>
+
+   <!-- Remove all tests except those known to fail -->
+   <target name="setupTestFailures"
+           depends="removeUnsupported, PassingTests, TestErrors, LinkageError"/>
+
+   <!-- Remove all tests except those known to have errors -->
+   <target name="setupTestErrors"
+           depends="removeUnsupported, TestFailures, PassingTests, LinkageError"/>
+
+   <!-- Remove all tests except those known to fail with linkage errors -->
+   <target name="setupLinkageError"
+           depends="removeUnsupported, TestFailures, TestErrors, PassingTests"/>
+<!--
+   <target name="init" depends="AsyncFuture, MultiDeployments, unzipUtil"/>
+-->
+   <target name="init" depends="AsyncFuture, MultiDeployments"/>
 
    <target name="unzipTests">
       <unzip dest="${basedir}/integration-tests"
@@ -38,11 +62,11 @@
 
 
    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
-   <target name="MultDeployments" depends="ZipMultDeployments, DeleteMultDeployments">
+   <target name="MultiDeployments" depends="ZipMultiDeployments, DeleteMultiDeployments">
       <!-- backup and remove tests that deploy multiple archives -->
    </target>
 
-   <fileset id="filesMultDeployments"
+   <fileset id="filesMultiDeployments"
             dir="."
             includes="integration-tests/src/test/java/org/jboss/resteasy/test/xxe/XxeSecureProcessingTest.java
             integration-tests/src/test/java/org/jboss/resteasy/test/xxe/XxeJaxbTest.java
@@ -92,15 +116,398 @@
             integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/UriInfoTest.java
             integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/MediaTypeFromMessageBodyWriterTest.java"/>
 
-   <target name="ZipMultDeployments">
-      <zip destfile="${basedir}/tests-MultDeployments.zip">
-         <fileset refid="filesMultDeployments" />
+   <target name="ZipMultiDeployments">
+      <zip destfile="${basedir}/tests-MultiDeployments.zip">
+         <fileset refid="filesMultiDeployments" />
       </zip>
    </target>
 
-   <target name="DeleteMultDeployments">
+   <target name="DeleteMultiDeployments">
       <delete>
-         <fileset refid="filesMultDeployments" />
+         <fileset refid="filesMultiDeployments" />
+      </delete>
+   </target>
+
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   <target name="other" depends="AnnotTargetsContainer, JsonAnnotations, MultiApplicationPath">
+   </target>
+
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   <target name="AnnotTargetsContainer" depends="ZipAnnotTargetsContainer, DeleteAnnotTargetsContainer">
+      <!-- backup and remove tests that deploy multiple archives -->
+   </target>
+
+   <fileset id="filesAnnotTargetsContainer"
+            dir="."
+            includes="integration-tests/src/test/java/org/jboss/resteasy/test/security/SslServerWithWildcardHostnameCertificateTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/security/SslServerWithCorrectCertificateTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/tracing/JsonFormattedTracingInfoTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/tracing/BasicTracingTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/tracing/OnDemandTracingTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/tracing/TracingTestBase.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/security/SslSniHostNamesTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/security/SslServerWithWrongHostnameCertificateTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/security/SslServerWithWildcardHostnameCertificateTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/security/SslServerWithCorrectCertificateTest.java"/>
+
+   <target name="ZipAnnotTargetsContainer">
+      <zip destfile="${basedir}/tests-AnnotTargetsContainer.zip">
+         <fileset refid="filesAnnotTargetsContainer" />
+      </zip>
+   </target>
+
+   <target name="DeleteAnnotTargetsContainer">
+      <delete>
+         <fileset refid="filesAnnotTargetsContainer" />
+      </delete>
+   </target>
+
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   <target name="JsonAnnotations" depends="ZipJsonAnnotations, DeleteJsonAnnotations">
+      <!-- backup and remove tests that deploy multiple archives -->
+   </target>
+
+   <fileset id="filesJsonAnnotations"
+            dir="."
+            includes="integration-tests/src/test/java/org/jboss/resteasy/test/providers/jsonp/JsonpTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/providers/jsonb/basic/JsonBindingTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/providers/jsonb/basic/JsonBindingAnnotationsJacksonTest.java"/>
+
+   <target name="ZipJsonAnnotations">
+      <zip destfile="${basedir}/tests-JsonAnnotations.zip">
+         <fileset refid="filesJsonAnnotations" />
+      </zip>
+   </target>
+
+   <target name="DeleteJsonAnnotations">
+      <delete>
+         <fileset refid="filesJsonAnnotations" />
+      </delete>
+   </target>
+
+
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   <target name="MultiApplicationPath" depends="ZipMultiApplicationPath, DeleteMultiApplicationPath">
+      <!-- backup and remove tests that deploy multiple archives -->
+   </target>
+
+   <fileset id="filesMultiApplicationPath"
+            dir="."
+            includes="integration-tests/src/test/java/org/jboss/resteasy/test/providers/jsonp/JsonpTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/providers/jsonb/basic/JsonBindingAnnotationsJacksonTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/HomecontrolCustomJAXBContextTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/providers/jackson2/whitelist/WhiteListPolymorphicTypeValidatorTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/providers/jackson2/whitelist/WhiteListPolymorphicTypeValidatorManualOverrideTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/providers/jackson2/whitelist/WhiteListPolymorphicTypeValidatorCatchAllTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/microprofile/config/MicroProfileConfigUseGlobalTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/cdi/validation/ValidationWithCDITest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/cdi/ejb/EJBCDIValidationTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/validation/ejb/EJBParameterViolationsOnlyTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/sourceProvider/SourceProviderTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/response/DuplicitePathTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/providers/sse/SsePostResourceMethodInvokerTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/core/basic/ApplicationTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/core/encoding/EncodedApplicationPathTest.java"/>
+
+   <target name="ZipMultiApplicationPath">
+      <zip destfile="${basedir}/tests-MultiApplicationPath.zip">
+         <fileset refid="filesMultiApplicationPath" />
+      </zip>
+   </target>
+
+   <target name="DeleteMultiApplicationPath">
+      <delete>
+         <fileset refid="filesMultiApplicationPath" />
+      </delete>
+   </target>
+
+
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   <target name="CdiQualifiers" depends="ZipCdiQualifiers, DeleteCdiQualifiers">
+      <!-- backup and remove tests that deploy multiple archives -->
+   </target>
+
+   <fileset id="filesCdiQualifiers"
+            dir="."
+            includes="integration-tests/src/test/java/org/jboss/resteasy/test/cdi/modules/WarLibIntoWarClassesTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/cdi/modules/WarClassesIntoWarLibTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/cdi/modules/EjbjarLibIntoWarLibTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/cdi/modules/EarLibIntoWarLibTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/cdi/modules/EarLibIntoEarLibTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/cdi/injection/InjectionJpaEnumTypeTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/cdi/inheritence/VanillaInheritanceTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/cdi/inheritence/SpecializedInheritanceTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/cdi/inheritence/AlternativeVanillaInheritanceTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/cdi/inheritence/AlternativeSelectedInheritanceTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/cdi/extensions/ScopeExtensionTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/cdi/extensions/BeanExtensionTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/cdi/basic/EJBTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/cdi/basic/EJBEventsTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/cdi/basic/BeanReaderWriterTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/asynch/AsyncInjectionTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/microprofile/restclient/RestClientProxyTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/core/basic/ApplicationConfigTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/RESTEasyParamBasicTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/MatrixPathParamTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/resource/constructor/ResourceConstructorParamsTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/ConstructedInjectionTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/providers/priority/ProviderPriorityProvidersRegisteredProgramaticallyTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/providers/priority/ProviderPriorityProvidersInApplicationTest.java"/>
+
+   <target name="ZipCdiQualifiers">
+      <zip destfile="${basedir}/tests-CdiQualifiers.zip">
+         <fileset refid="filesCdiQualifiers" />
+      </zip>
+   </target>
+
+   <target name="DeleteCdiQualifiers">
+      <delete>
+         <fileset refid="filesCdiQualifiers" />
+      </delete>
+   </target>
+
+
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   <target name="TestFailures" depends="ZipTestFailures, DeleteTestFailures">
+      <!-- Failures are tests that ran but did not return the correct value -->
+      <!-- backup and remove tests that deploy multiple archives -->
+   </target>
+
+   <fileset id="filesTestFailures"
+            dir="."
+            includes="integration-tests/src/test/java/org/jboss/resteasy/test/client/other/ApacheHttpClient43Test.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/client/ClientBuilderTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/cdi/interceptors/TimerInterceptorTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/cdi/interceptors/NameBoundCDIProxiesTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/cdi/interceptors/InterceptorTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/cdi/generic/ConcreteDecoratorTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/cdi/basic/OutOfBandTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/cdi/basic/EjbExceptionUnwrapTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/cdi/basic/DecoratorsTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/cdi/basic/ApplicationInjectionTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/asynch/AsynchCounterTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/asynch/AsynchContextualDataTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/validation/cdi/SubresourceValidationTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/validation/ValidationSurpressPathTrueTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/security/CustomForbiddenMessageTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/security/BasicAuthTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/response/PublisherResponseTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/response/PublisherResponseRawStreamTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/response/PublisherResponseNoStreamTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/response/HeadContentLengthTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/response/AnotherPublisherResponseTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/request/PreconditionRfc7232Test.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/request/DateFormatPathTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/path/EncodedPathTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/SpecialCharsInUrlTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/WiderMappingNegativeTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/WiderMappingTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/ResourceInfoInjectionTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/ParameterSubResTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/MultipleGetResourceTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/MediaTypeNegotiationServerQualityTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/MediaTypeNegotiationClientQualityTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/ExtensionTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/DefaultMediaTypeTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/sse/SseTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/sse/SseJsonEventTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/sse/SseEventSinkTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/providers/sse/SseCORSFilterTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/multipart/MimeMultipartProviderTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/multipart/InputPartDefaultContentTypeWildcardOverwriteNewInterceptorTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jsonb/basic/JsonBindingDebugLoggingTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/JaxbMarshallingSoakTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jackson2/jsonfilter/JsonFilterWithServletMultipleFiltersTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jackson2/jsonfilter/JsonFilterWithServletConditionalFilterTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jackson2/jsonfilter/JsonFilterWithSerlvetFilterTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jackson2/jsonfilter/JsonFilterWithInterceptrTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jackson2/jsonfilter/JsonFilterWithInterceptorMultipleFiltersTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jackson2/jsonfilter/JsonFilterWithInterceptorConditionalFilterTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jackson2/jsonfilter/JsonFilterSuperClassTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jackson2/JacksonJsonViewTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/custom/WriterNotBuiltinTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/custom/MissingProducerTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/custom/DuplicateProviderRegistrationTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/atom/LinkTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/microprofile/config/MicroProfileConfigServletTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/microprofile/config/MicroProfileConfigServletContextListenerTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/microprofile/config/MicroProfileConfigFilterTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/jsapi/JSAPIGetBasicJsapiHandlingScriptTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/DynamicFeatureTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/form/ResteasyUseContainerFormParamsTest.java
+             integration-tests/src/test/java/org/jboss/resteasy/test/core/spi/ResourceClassProcessorErrorTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/multipart/resource/InputPartDefaultContentTypeWildcardOverwriteNewInterceptor.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/resource/JaxbMarshallingSoakAsyncService.java
+integration-tests/src/test/java/org/jboss/resteasy/test/validation/ValidationHibernateI18NTest.java"/>
+
+   <target name="ZipTestFailures">
+      <zip destfile="${basedir}/tests-TestFailures.zip">
+         <fileset refid="filesTestFailures" />
+      </zip>
+   </target>
+
+   <target name="DeleteTestFailures">
+      <delete>
+         <fileset refid="filesTestFailures" />
+      </delete>
+   </target>
+
+
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   <target name="TestErrors" depends="ZipTestErrors, DeleteTestErrors">
+      <!-- tests that did not run because there was some issue resolving code -->
+      <!-- backup and remove tests that deploy multiple archives -->
+   </target>
+
+   <fileset id="filesTestErrors"
+            dir="."
+            includes="integration-tests/src/test/java/org/jboss/resteasy/test/client/WebTargetTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/client/HeaderEmptyHostTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/cdi/injection/WeldSubdeploymentTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/cdi/injection/NonProxyableProviderTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/cdi/basic/SingletonTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/cache/ServerCacheInterceptorTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/client/exception/ExceptionBufferingTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/asynch/AsynchBasicTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/QueryParamAsPrimitiveTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/QueryParamAsPrimitiveResourceArrayDefault.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/QueryParamAsPrimitiveResourceListDefault.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/QueryParamAsPrimitiveResourceWrappers.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/QueryParamAsPrimitiveResourceArray.java
+integration-tests/src/test/java/org/jboss/resteasy/test/cdi/injection/resource/WeldSubdeploymentStatefulResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/QueryParamAsPrimitiveResourceDefaultNull.java
+integration-tests/src/test/java/org/jboss/resteasy/test/cdi/injection/resource/WeldSubdeploymentRequestResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/asynch/resource/AsynchBasicResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/QueryParamAsPrimitiveResourceWrappersDefault.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/QueryParamAsPrimitiveResourceListDefaultNull.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/QueryParamAsPrimitiveResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/QueryParamAsPrimitiveResourceListDefaultOverride.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/QueryParamAsPrimitiveResourceDefault.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/QueryParamAsPrimitiveResourceDefaultOverride.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/QueryParamAsPrimitiveResourceWrappersDefaultNull.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/QueryParamAsPrimitiveResourceList.java
+integration-tests/src/test/java/org/jboss/resteasy/test/cdi/injection/resource/WeldSubdeploymentStatelessResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/QueryParamAsPrimitiveResourceArrayDefaultOverride.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/QueryParamAsPrimitiveResourceArrayDefaultNull.java
+integration-tests/src/test/java/org/jboss/resteasy/test/cdi/injection/resource/WeldSubdeploymentApplicationResource.java
+             integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/QueryParamAsPrimitiveResourceWrappersDefaultOverride.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/multipart/EmbeddedMultipartTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jackson2/CustomJackson2ProviderTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/html/HeadersInViewResponseTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/custom/FilterDispatcherUndertowTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/GZIPAnnotationTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/injection/PostConstructInjectionTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/form/Resteasy1405Test.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/spi/ResourceClassProcessorBasicTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/smoke/WireSmokeTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/smoke/ResourceWithMultipleInterfacesTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/smoke/ResourceWithInterfaceTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/servlet/UndertowTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/servlet/ServletMappingTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/servlet/ServletConfigTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/servlet/FilterTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/interceptors/ReaderContextTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/interceptors/PreProcessorExceptionMapperTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/interceptors/GzipTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/interceptors/GzipSizeTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/interceptors/FilteredCookieTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/interceptors/CorsFiltersTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/interceptors/ClientResponseFilterExceptionTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/encoding/SpecialCharactersTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/encoding/ParameterEncodingTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/encoding/MatrixParamEncodingTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/encoding/EncodingTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/encoding/EncodedParamsTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/basic/ProviderInjectionTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/basic/PrivateConstructorTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/basic/PartialAnnotationResourceTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/basic/NullHeaderTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/basic/NoApplicationSubclassTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/basic/InvalidMediaTypeTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/basic/InternalDispatcherTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/basic/FileExtensionMappingTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/basic/DuplicateDeploymentTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/basic/ContextTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/basic/CacheControlAnnotationTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/basic/ApplicationPropertiesConfigTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/basic/ApplicationPropertiesConfigPropertyApplicationInjectionTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/basic/ApplicationFilterTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/basic/AppConfigTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/basic/AnnotationInheritanceTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/basic/AnnotationInheritanceGenericsTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/basic/AcceptLanguagesTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/ResteasyJAXRSImplTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/WhitespaceTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/UnauthorizedHttpCodeTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/SubResourceLocatorProxyTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/ResponseObjectTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/ProxyWithGenericReturnTypeTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/ProxyNullInputStreamTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/ProxyJaxbResourcePostTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/ProxyJaxbResourceIntfTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/ProxyInputStreamTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/ProxyClassloaderTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/ProxyCastingTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/ProxyCastingSimpleTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/NullEntityProxyTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/MediaTypeCaseSensitivityTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/GenericProxyTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/EncodedPathProxyTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/DefaultMediaTypesTest.java
+               integration-tests/src/test/java/org/jboss/resteasy/test/cdi/basic/CDIResourceTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/encoding/resource/EncodedParamsSimpleResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/resource/SubResourceLocatorProxyBookResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/resource/SubResourceLocatorProxyBookResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/resource/SubResourceLocatorProxyBookResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/resource/SubResourceLocatorProxyChapterResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/resource/SubResourceLocatorProxyChapterResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/encoding/resource/EncodedParamsComplexResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/basic/resource/InternalDispatcherClient.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/resource/DefaultMediaTypesResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/resource/DefaultMediaTypesResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/basic/resource/InternalDispatcherForwardingResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/basic/resource/InternalDispatcherClient.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/basic/resource/InternalDispatcherClient.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/basic/resource/InternalDispatcherForwardingResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/basic/resource/InternalDispatcherForwardingResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/sse/SseReconnectTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/sse/SseBroadcastTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/crypto/SigningTest.java"/>
+
+   <target name="ZipTestErrors">
+      <zip destfile="${basedir}/tests-TestErrors.zip">
+         <fileset refid="filesTestErrors" />
+      </zip>
+   </target>
+
+   <target name="DeleteTestErrors">
+      <delete>
+         <fileset refid="filesTestErrors" />
+      </delete>
+   </target>
+
+
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   <target name="LinkageError" depends="ZipLinkageError, DeleteLinkageError">
+      <!-- backup and remove tests that deploy multiple archives -->
+   </target>
+
+   <fileset id="filesLinkageError"
+            dir="."
+            includes="integration-tests/src/test/java/org/jboss/resteasy/test/validation/GetterReturnValueValidatedTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/validation/ExecutableValidationDisabledTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/security/SslServerWithoutCertificateTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/XmlJaxbProvidersTest.java"/>
+
+   <target name="ZipLinkageError">
+      <zip destfile="${basedir}/tests-LinkageError.zip">
+         <fileset refid="filesLinkageError" />
+      </zip>
+   </target>
+
+   <target name="DeleteLinkageError">
+      <delete>
+         <fileset refid="filesLinkageError" />
       </delete>
    </target>
 
@@ -110,4 +517,438 @@
       <!-- provide utility for heapdump -->
       <unzip dest="${basedir}" src="lib/util-HeapDump.zip"/>
    </target>
+
+
+
+   <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+   <target name="PassingTests" depends="ZipPassingTests, DeletePassingTests">
+      <!-- backup and remove tests that deploy multiple archives -->
+   </target>
+
+   <fileset id="filesPassingTests"
+            dir="."
+            includes="integration-tests/src/test/java/org/jboss/resteasy/test/xxe/NamespaceJaxbTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/wadl/DeploymentTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/validation/cdi/ValidationSessionBeanTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/validation/cdi/CDIValidationSessionBeanTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/validation/cdi/CDIValidationCoreTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/validation/cdi/ApplicationScopeValidationTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/validation/ValidationXMLTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/validation/ValidationThroughRestTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/validation/ValidationTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/validation/ValidationSurpressPathFalseTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/validation/ValidationSurpressPathDefaultTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/validation/ValidationOnGetterTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/validation/ValidationHibernateI18NTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/validation/ValidationCoreTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/validation/ManagedBeanValidationTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/validation/GetterReturnValueNotValidatedTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/validation/ContextProvidersNewClientTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/util/DynamicFeatureContextDelegateTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/stream/StreamRawObservableRxJava2Test.java
+integration-tests/src/test/java/org/jboss/resteasy/test/stream/StreamRawFlowableRxJava2Test.java
+integration-tests/src/test/java/org/jboss/resteasy/test/rx/rxjava2/Rx2SingleTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/rx/rxjava2/Rx2SingleServerAsyncTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/rx/rxjava2/Rx2SingleProxyTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/rx/rxjava2/Rx2SingleProxyServerAsyncTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/rx/rxjava2/Rx2SingleProxyClientAsyncTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/rx/rxjava2/Rx2SingleClientAsyncTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/rx/rxjava2/Rx2ObservableTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/rx/rxjava2/Rx2ObservableServerAsyncTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/rx/rxjava2/Rx2ObservableSSECompatibilityTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/rx/rxjava2/Rx2ObservableProxyTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/rx/rxjava2/Rx2ObservableProxyServerAsyncTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/rx/rxjava2/Rx2FlowableTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/rx/rxjava2/Rx2FlowableServerAsyncTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/rx/rxjava2/Rx2FlowableSSECompatibilityTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/rx/rxjava2/Rx2FlowableProxyTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/rx/rxjava2/Rx2FlowableProxyServerAsyncTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/rx/rxjava2/NoStreamRx2Test.java
+integration-tests/src/test/java/org/jboss/resteasy/test/rx/RxCompletionStageTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/rx/RxCompletionStageServerAsyncTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/rx/RxCompletionStageProxyTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/rx/RxCompletionStageProxyServerAsyncTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/rx/RxCompletionStageProxyClientAsyncTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/rx/RxCompletionStageClientAsyncTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/rx/RxCompletionStageAsyncClientAsyncTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/response/WriterMatchingTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/response/VariantsTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/response/VariantAcceptTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/response/ResponseTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/response/ResponseStreamPrematurelyClosedTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/response/ResponseHeaderTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/response/RangeTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/response/ProduceConsumeTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/response/OptionsTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/response/MethodDefaultTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/response/InheritedContextTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/response/HttponlyCookieTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/response/HttpRequestParameterInjectorTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/response/CookieTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/response/ContentLanguageHeaderTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/response/CompletionStageResponseTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/response/CommitNewCookiesHeaderTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/response/AnotherPublisherResponseNoStreamTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/request/ResteasyRequestTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/request/PreconditionTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/request/NotFoundErrorMessageTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/path/WildcardResourceMatchingTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/path/TrailingSlashTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/path/ResteasyTrailingSlashTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/path/ResourceMatchingTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/path/ResourceMatchingMultipleTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/path/ResourceLocatorWithBaseNoExpressionTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/path/ResourceLocatorWithBaseExpressionTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/path/ResourceLocatorRegexNonCapturingGroupTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/path/ResourceLocatorRegexCapturingGroupTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/path/PathParamTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/path/PathParamMissingDefaultValueTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/path/PathLimitedTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/path/MultipleMatrixSegmentsTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/path/LocatorWithClassHierarchyTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/path/LocatorTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/path/LocatorSubResourceReturningThisTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/patch/PatchErrorHandlingTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/UriParamAsPrimitiveTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/SuperStringConverterTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/StringParamUnmarshallerTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/RESTEasyParamCdiTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/QueryTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/QueryParamWithMultipleEqualsTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/PrimitiveParamConverterTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/ParamTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/ParamConverterTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/MultiplePathSegmentTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/MultiValuedParamDefaultParamConverterTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/MultiValuedParamDateProxyTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/MultiValuedParamDateNoProxyTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/MultiValuedParamCustomClassTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/MultiValuedParamCdiTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/MatrixParamAsPrimitiveTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/HeaderParamsAsPrimitivesTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/HeaderParamParamConverterTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/HeaderDelegateTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/HeaderDelegateAsProviderTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/FormParamTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/CookieInjectionTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/ComplexPathParamTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/SubResourceLocatorTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/SpecialResourceTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/ScanTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/ResponseCommittedTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/ResourceLocatorTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/ReponseInfoTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/MultipleEndpointsWarningTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/MultipleAcceptHeaderTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/MultiInterfaceResLocatorTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/MediaTypeNegotiationTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/MatchedResourceTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/InheritanceTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/HttpHeadersTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/GenericResourceTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/GenericEntityTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/CovariantReturnSubresourceLocatorsTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/CollectionDefaultValueTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/ClassLevelMediaTypeTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/sse/SseSmokeTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/sse/SseEventSourceTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/sse/SseEventSinkClosingTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/sse/SseEnablingTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/sse/SseBroadcasterTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/sse/SseAPITest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/plain/DefaultNumberWriterTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/plain/CharsetTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/noproduces/ProviderWithNoProducesTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/multipart/XOPMultipartProxyTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/ContextTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/ContentLanguageProxyTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/ClientSmokeTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/ClientResponseFailureTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/other/CustomHttpClientEngineTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/exception/UnauthorizedExceptionTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/exception/ClientExceptionsTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/exception/ClientErrorTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/exception/ClientErrorBadMediaTypeTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/TimeoutTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/SyncInvokeTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/SmokeParamTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/RedirectTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/PrimitiveTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/ParameterListTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/NullEntityTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/LinkHeaderTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/JAXRS21PatchTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/InputStreamTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/InputStreamResourceTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/IndirectInvocationTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/InContainerClientBenchTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/GenericReturnTypeTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/ClientResponseWithEntityTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/ClientResponseRedirectTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/ClientProviderTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/ClientInvocationBuilderTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/ClientFormParamTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/ClientExecutorShutdownTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/ClientDynamicFeaturesTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/ClientCookieTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/ClientCacheTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/ClientCacheInterceptorTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/ChunkedTransferEncodingTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/AsyncTimeoutExceptionsTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/AsyncInvokeTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/AsyncBenchTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/AbortMessageTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/cdi/injection/LazyInitUriInfoInjectionTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/cdi/ejb/EJBCDIValidationEJBProxyTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/cdi/basic/EventsTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/cdi/basic/CDILocatorTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/cdi/basic/AsynchronousCdiTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/cdi/UtilitiesTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/asynch/SuspendAnnotationTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/asynch/JaxrsAsyncTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/asynch/JaxrsAsyncServletTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/asynch/ComprehensiveJaxrsTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/asynch/CallbackTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/asynch/AsyncUnhandledExceptionTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/asynch/AsyncTimeoutTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/asynch/AsyncServletTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/asynch/AsyncRequestFilterTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/asynch/AsyncPostProcessingTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/multipart/ContextProvidersTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/MultiValuedParamDefaultParamConverterProxyTest.java
+                integration-tests/src/test/java/org/jboss/resteasy/test/asynch/AsyncGenericEntityTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/UriParamAsPrimitiveResourceUriCharWrapper.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/HeaderParamsAsPrimitivesResourceArrayDefaultOverride.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/UriParamAsPrimitiveResourceUriIntWrapper.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/MatrixParamAsPrimitiveList.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/HeaderDelegateResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/UriParamAsPrimitiveResourceUriLong.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/HeaderParamsAsPrimitivesResourceListDefaultNull.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/ComplexPathParamExtensionResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/UriParamAsPrimitiveResourceUriShort.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/HeaderParamsAsPrimitivesResourceArray.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/resource/ClientProviderStringEntityProviderReader.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/UriParamAsPrimitiveResourceUriByte.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/MatrixParamAsPrimitiveListDefaultNull.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/UriParamAsPrimitiveResourceUriShortWrapper.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/MatrixParamAsPrimitiveArrayDefaultNull.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/UriParamAsPrimitiveResourceUriBooleanWrapper.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/UriParamAsPrimitiveResourceUriLongWrapper.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/UriParamAsPrimitiveResourceUriDoubleWrapper.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/resource/ReponseInfoResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/basic/resource/ResponseCommittedResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/MatrixParamAsPrimitiveWrappersDefaultNull.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/path/resource/ResourceMatchingStringBeanEntityProvider.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/MatrixParamAsPrimitiveArrayDefaultOverride.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/HeaderParamsAsPrimitivesResourceListDefaultOverride.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/resource/ClientCacheService.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/UriParamAsPrimitiveResourceUriInt.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/UriParamAsPrimitiveResourceUriFloatWrapper.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/HeaderParamsAsPrimitivesResourceDefault.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/MatrixParamAsPrimitivePrimitives.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/UriParamAsPrimitiveResourceUriFloat.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/HeaderParamsAsPrimitivesResourceSet.java
+integration-tests/src/test/java/org/jboss/resteasy/test/response/resource/VariantAcceptResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/HeaderParamsAsPrimitivesResourceWrappers.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/MatrixParamAsPrimitiveWrappersDefaultOverride.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/HeaderParamsAsPrimitivesResourceWrappersDefaultNull.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/MatrixParamAsPrimitiveListDefaultOverride.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/resource/ClientFormResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/resource/ClientFormResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/HeaderParamsAsPrimitivesResourceList.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/HeaderParamsAsPrimitivesResourceSortedSet.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/ComplexPathParamUnlimitedResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/MatrixParamAsPrimitiveListDefault.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/MatrixParamAsPrimitiveWrappersDefault.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/StringParamUnmarshallerService.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/UriParamAsPrimitiveResourceUriDouble.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/MatrixParamAsPrimitiveDefaultNull.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/MatrixParamAsPrimitiveArrayDefault.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/UriParamAsPrimitiveResourceUriByteWrapper.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/StringParamUnmarshallerDateFormatter.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/resource/SyncInvokeResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/ComplexPathParamTrickyResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/HeaderParamsAsPrimitivesResourceArrayDefaultNull.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/UriParamAsPrimitiveResourceUriChar.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/MatrixParamAsPrimitiveWrappers.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/MatrixParamAsPrimitiveArray.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/resource/AsyncInvokeResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/MatrixParamAsPrimitiveDefault.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/MatrixParamAsPrimitiveDefaultOverride.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/resource/ClientResponseFailureResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/resource/ClientResponseFailureResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/resource/ContextTestResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/proxy/resource/ContextTestResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/HeaderParamsAsPrimitivesResourcePrimitives.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/resource/TimeoutResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/resource/TimeoutResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/UriParamAsPrimitiveResourceUriBoolean.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/HeaderParamsAsPrimitivesResourceWrappersDefaultOverride.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/HeaderParamsAsPrimitivesResourceDefaultNull.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/HeaderParamsAsPrimitivesResourceListDefault.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/HeaderParamsAsPrimitivesResourceDefaultOverride.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/HeaderParamsAsPrimitivesResourceArrayDefault.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/HeaderParamsAsPrimitivesResourceWrappersDefault.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/resource/ClientResponseRedirectResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/resource/param/resource/StringParamUnmarshallerService.java
+integration-tests/src/test/java/org/jboss/resteasy/test/client/resource/SyncInvokeResource.java
+             integration-tests/src/test/java/org/jboss/resteasy/test/client/resource/AsyncInvokeResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/multipart/SoupMultipartMsgTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/multipart/ProxyTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/multipart/NullPartTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/multipart/InputPartDefaultContentTypeEncodingOverwriteTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/multipart/HeaderFlushedOutputStreamTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/multipart/GenericTypeMultipartTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/multipart/EncodingMimeMultipartFormProviderTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/multipart/EmptyInputStreamMultipartProviderTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/multipart/ComplexMultipartOutputTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/mediatype/BlacklistedMediaTypeTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/mbw/MessageBodyWriterObjectDefaultTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/map/MapProviderTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/map/MapProviderBuiltInTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jsonb/basic/SetMethodWithMoreArgumentsTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/XmlJavaTypeAdapterTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/XmlJAXBContextFinderTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/JaxbXmlRootElementProviderTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/XmlHeaderTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/XmlEnumParamTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/StringCharsetTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/StreamResetTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/StatsTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/SeeAlsoAnnotationTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/QualityFactorTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/ParsingTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/MapTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/LinkJaxbTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/JaxbElementTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/JaxbCollectionTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/JaxbCacheTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/InheritanceTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/GenericSuperInterfaceTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/ExceptionMapperJaxbTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/EmptyContentTypeTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/CustomOverrideTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/CollectionCoreTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/CharacterSetTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/CharSetTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/CharSetRE1066Test.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/BadContentTypeTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/AbstractJaxbClassTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jackson2/multipart/Jackson2MultipartFormTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jackson2/JacksonJaxbCoexistenceTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/inputstream/InputStreamCloseTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/iioimage/IIOImageProviderTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/file/TempFileDeletionTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/datasource/ReadFromSocketDataSourceProviderTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/datasource/ReadDataSourceTwiceCountTempFileTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/datasource/ReadDataSourceTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/datasource/DataSourceProviderInputStreamTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/datasource/CleanFilesDataSourceProviderTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/datasource/BigSmallDataSourceTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/custom/SingletonCustomProviderTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/custom/SetRequestUriTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/custom/RetrieveRegisteredClassesTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/custom/ResponseGetAnnotationsTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/custom/ResponseFilterTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/custom/ResponseFilterChangeStatusTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/custom/ResponseContainerFilterTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/custom/ProviderContextInjectionTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/custom/CustomValueInjectorTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/custom/CustomProviderPreferenceTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/custom/CustomContextProviderPreferenceTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/custom/CustomConstrainedFeatureTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/custom/CollectionProviderTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/atom/JAXBContextFinderTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/atom/AtomProviderTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/atom/AtomComplexModelTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/microprofile/restclient/RestClientProviderPriorityTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/StreamCloseTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/ResponseFilterCustomExceptionTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/ReaderInterceptorContextTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/PriorityExecutionTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/PreMatchingClientRequestFilterTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/InterceptorStreamTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/ClientRequestFilterRegistrationTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/ClientFilterResponseBuilderTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/ApplicationConfigWithInterceptorTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/form/NestedCollectionsFormTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/form/FormUrlEncodedTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/form/FormUrlEncodedCharsetTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/form/FormResourceTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/form/FormParameterTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/form/FormParamPutTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/form/FormEntityTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/form/FormBodyResourceTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/form/ComplexFormTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/form/CollectionsFormTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/exception/WebApplicationExceptionTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/exception/ResponseExceptionMapperRuntimeExceptionTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/exception/ExceptionMapperWebRuntimeExceptionTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/exception/ExceptionMapperTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/exception/ExceptionMapperInjectionTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/exception/ExceptionMapperCustomRuntimeExceptionTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/exception/ExceptionMapperApplicationRuntimeExceptionTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/exception/ExceptionHandlingTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/exception/ClosedResponseHandlingTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/exception/AbstractExceptionMapperTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/crypto/VerifyDecryptTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/crypto/PKCS7SignatureSmokeTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/crypto/CryptoTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/spi/ResourceClassProcessorPriorityTest.java
+                      integration-tests/src/test/java/org/jboss/resteasy/test/core/spi/ResourceClassProcessorNotAppliedTest.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/resource/PriorityExecutionClientRequestFilterMax.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/resource/PriorityExecutionContainerRequestFilter1.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/resource/PriorityExecutionContainerRequestFilterMin.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/custom/resource/CollectionProviderIncorrectCollectionWriter.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/multipart/resource/InputPartDefaultContentTypeEncodingOverwriteSetterContainerRequestFilter.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/resource/PriorityExecutionClientRequestFilter3.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/spi/resource/ResourceClassProcessorPriiorityBImplementation.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/spi/resource/ResourceClassProcessorPriiorityAImplementation.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/atom/resource/AtomProviderResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/resource/PriorityExecutionClientResponseFilterMax.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/resource/PriorityExecutionContainerResponseFilter1.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/resource/PriorityExecutionContainerRequestFilter3.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/resource/PriorityExecutionClientRequestFilterMin.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/resource/PriorityExecutionContainerRequestFilterMax.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/resource/PriorityExecutionClientResponseFilter1.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/multipart/resource/GenericTypeResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/resource/PriorityExecutionClientRequestFilter1.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/resource/PriorityExecutionContainerResponseFilterMax.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/resource/PriorityExecutionClientResponseFilter2.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/mediatype/resource/BlacklistedMediaTypeResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/resource/PriorityExecutionContainerRequestFilter2.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/spi/resource/ResourceClassProcessorNotAppliedImplementation.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/resource/PriorityExecutionContainerResponseFilterMin.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/custom/resource/CollectionProviderCollectionWriter.java
+integration-tests/src/test/java/org/jboss/resteasy/test/core/spi/resource/ResourceClassProcessorPriiorityCImplementation.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/resource/PriorityExecutionClientResponseFilter3.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/resource/PriorityExecutionContainerResponseFilter2.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/resource/PriorityExecutionContainerResponseFilter3.java
+integration-tests/src/test/java/org/jboss/resteasy/test/exception/resource/ClosedResponseHandlingEnableTracingRequestFilter.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/multipart/resource/GenericTypeStringListReaderWriter.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/resource/PriorityExecutionClientRequestFilter2.java
+integration-tests/src/test/java/org/jboss/resteasy/test/interceptor/resource/PriorityExecutionClientResponseFilterMin.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/resource/CharSetMovieResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/resource/CharSetMovieResource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/resource/CharSetRE1066Resource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/resource/CharSetRE1066Resource.java
+integration-tests/src/test/java/org/jboss/resteasy/test/providers/jaxb/resource/CharSetRE1066Resource.java"/>
+
+   <target name="ZipPassingTests">
+      <zip destfile="${basedir}/tests-PassingTests.zip">
+         <fileset refid="filesPassingTests" />
+      </zip>
+   </target>
+
+   <target name="DeletePassingTests">
+      <delete>
+         <fileset refid="filesPassingTests" />
+      </delete>
+   </target>
+
+
+
+
+
+
 </project>

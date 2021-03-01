@@ -67,11 +67,12 @@ _integration-tests_.
         individual tests.
         
 ## Test debugging
-To debug individual tests use the _test-exclusion_ profile in conjunction with
-surefire flag _-Dmaven.surefire.debug_.  In your IDE set breakpoints
-and configure a remote debugger for port 5005.  Edit the exclude list in
-profile _test-exclusion_ and run the test as follows.
-* **'mvn test -P test-exclusion -Dmaven.surefire.debug'**  
+To debug individual tests use the surefire flag _-Dmaven.surefire.debug_ 
+with _-Dtest=_.  In your IDE set breakpoints and configure a remote debugger 
+for port 5005.  Here is an example of a commnand to run in a terminal window.
+* **'mvn test -Dmaven.surefire.debug  -Dtest=org/jboss/resteasy/test/response/WriterMatchingTest.java'**  
+
+
 
 Occasionally there is a failure during the compiling process.  Currently
 little helpful information is provided.  To further debug the issue it is

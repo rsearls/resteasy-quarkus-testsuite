@@ -1,3 +1,141 @@
+-- Feb 25, 2021
+    org.jboss.resteasy.test.providers.sse.SseReconnectTest
+    org.jboss.resteasy.test.providers.sse.SseBroadcastTest
+    -- cause of failure
+        @javax.ejb.Singleton declared on org.jboss.resteasy.test.providers.sse.resource.SseReconnectResource,
+        use @javax.inject.Singleton instead
+
+-- Dec 17,2020
+    org/jboss/resteasy/test/resource/basic/MediaTypeNegotiationServerQualityTest.java
+    and org/jboss/resteasy/test/resource/basic/MediaTypeNegotiationClientQualityTest.java
+    -- cause of failure
+        The test sets path to "echo".  There is no endpoint @Path("echo").   It seems
+        it is captured by undertow and responded to.  Quarkus does not recognize
+        this path and does not response similarly.
+
+    org/jboss/resteasy/test/resource/basic/DefaultMediaTypeTest.java
+    -- cause of failure
+        Quarkus does not support annotation @Category.  The 2 tests that use it
+        fail.  All other tests in class pass.
+
+    org/jboss/resteasy/test/providers/sse/SseTest.java
+    and org.jboss.resteasy.test.providers.sse.SseEventSinkTest
+    and org.jboss.resteasy.test.providers.sse.SseCORSFilterTest
+    -- cause of failure
+        Provides information in a web.xml file.  Quarkus does not process it.
+
+    org.jboss.resteasy.test.providers.multipart.MimeMultipartProviderTest
+    and org.jboss.resteasy.test.providers.jsonb.basic.JsonBindingDebugLoggingTest
+    -- cause of failure
+        Quarkus can not find org.apache.logging.log4j.util.StackLocator.
+
+    org/jboss/resteasy/test/providers/multipart/InputPartDefaultContentTypeWildcardOverwriteNewInterceptorTest.java
+    -- cause of failure
+        Quarkus does not find the MessageBodyReader for media type:
+        application/xml; charset=UTF-8 and class type
+        org.jboss.resteasy.test.providers.multipart.resource.InputPartDefaultContentTypeWildcardOverwriteXmlBean
+
+    org.jboss.resteasy.test.providers.jackson2.jsonfilter.JsonFilterWithInterceptrTest
+    and org.jboss.resteasy.test.providers.jackson2.jsonfilter.JsonFilterWithInterceptorMultipleFiltersTest
+    and org.jboss.resteasy.test.providers.jackson2.jsonfilter.JsonFilterWithInterceptorConditionalFilterTest
+    and org.jboss.resteasy.test.providers.jackson2.jsonfilter.JsonFilterSuperClassTest
+    and org.jboss.resteasy.test.providers.jackson2.JacksonJsonViewTest
+    -- cause of failure
+        jackson not yet supported.
+
+
+-- Dec 15,2020
+    org/jboss/resteasy/test/resource/request/PreconditionRfc7232Test.java
+    and org/jboss/resteasy/test/resource/basic/WiderMappingTest.java
+    and org/jboss/resteasy/test/resource/basic/MultipleGetResourceTest.java
+    and org/jboss/resteasy/test/resource/basic/ExtensionTest.java
+    and org.jboss.resteasy.test.providers.sse.SseJsonEventTest
+    and org.jboss.resteasy.test.providers.jaxb.JaxbMarshallingSoakTest
+    and org.jboss.resteasy.test.providers.jackson2.jsonfilter.JsonFilterWithServletMultipleFiltersTest
+    and org.jboss.resteasy.test.providers.jackson2.jsonfilter.JsonFilterWithServletConditionalFilterTest
+    and org.jboss.resteasy.test.providers.jackson2.jsonfilter.JsonFilterWithSerlvetFilterTest
+    -- cause of failure
+        This test generates a web.xml file with context-params.  Quarkus
+        does not process web.xml content.  This test will always fail.
+
+    org/jboss/resteasy/test/resource/basic/ResourceInfoInjectionTest.java
+    -- cause of failure
+      Undertows classes ServletInputStreamImpl (line 241) and ServletContextImpl
+      (line 188) are used to call the endpoints implementation inputStream method,
+      onDataAvailable().  For some reason this under laying code is calling this
+      method twice.  It should only be called once.  The first call writes the
+      outputStream properly.  The 2nd call reads -1 data.  The write to outputStream
+      generates an ArrayOutOfBounds exceptions.  This detail is not reported instead
+      an HTTP 500 error is reported to the client.  It is unclear why there are
+      2 read attempts.
+
+    org/jboss/resteasy/test/resource/basic/ParameterSubResTest.java
+    -- cause of failure
+        Class ParameterSubResClassSub has @Inject annotations for class variables.
+        Quarkus creates class but does not perform the injections.  This causes
+        A NullPointException to be generated.
+
+
+-- Dec 10, 2020
+    org/jboss/resteasy/test/validation/cdi/SubresourceValidationTest.java
+    -- cause of failure
+      Because of the way quarkus creates class SubresourceValidationSubResource,
+      NOT as a proxy class.  Validation reports a property validation error on
+      "y" in addition to the 2 parameter validation issues.  This is reported
+      as a test failure.  Other than that the test is functioning normally.
+
+    org/jboss/resteasy/test/security/CustomForbiddenMessageTest.java
+    -- cause of failure
+        Annotation javax.annotation.security.DenyAll is not handled by quarkus.
+
+    org.jboss.resteasy.test.security.BasicAuthTest
+    -- cause of failure
+      Does not handle security code.
+
+    org/jboss/resteasy/test/response/PublisherResponseTest.java
+    and org/jboss/resteasy/test/response/PublisherResponseRawStreamTest.java
+    and org/jboss/resteasy/test/response/AnotherPublisherResponseTest.java
+    -- cause of failure
+      When run in quarkus stack in ThreadLocalStack already has 1 element in it.
+      This throws off the expected return value.   Other than that this test
+      runs OK.
+
+    org/jboss/resteasy/test/response/HeadContentLengthTest.java
+    -- cause of failure
+      When HEAD is called the endpoint and value returned.  Vertx returns
+      Content-length 0.
+
+
+-- Dec 9, 2020
+   org/jboss/resteasy/test/providers/multipart/EmbeddedMultipartTest.java
+   -- cause of failure
+     Provider JAXBXmlRootElementProvider is never loaded.  It may not be
+     in the classpath.
+
+   org/jboss/resteasy/test/interceptor/GZIPAnnotationTest.java
+   -- cause of failure
+    This is an issue with GZIPEncodingIntercetor$EnableGZIPOutputStream
+    writing data. The string "test" is converted to byte[] (116,101,115,116]
+    is written as byte[] (31,-117,8)
+
+    org.jboss.resteasy.test.injection.PostConstructInjectionTest
+       -- cause of failure
+        Quarkus not mapping a declared @Interceptors class
+        (e.g. PostConstructInjectionEJBInterceptor is declared with class level
+          @Interceptor.  PostConstructInjectionEJBResource references that class
+          using @Interceptors. )
+
+
+
+-- Dec 2, 2020
+- Quarkus 1.9.0.Final
+    - does not support multiple classes with @ApplicationPath.
+    - Still issue support 2 Json annotations.
+    - Does not support @TargetsContainer.
+    - Can not find org.apache.logging.log4j.util.StackLocator.
+    - Does not support CDI qualifiers=[@Default, @Any]
+
+
 -- Oct 28, 2020
 - Quarkus 1.9.0.Final has a memory leak.  An OutOfMemoryError occurs about 183 tests
         into the test set (441 test files).  From a heapdump the offending
