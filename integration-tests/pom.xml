@@ -49,7 +49,7 @@
     <dep.arquillian-bom.version>1.6.0.Final</dep.arquillian-bom.version>
     <javax.servlet-api-version>3.1.0</javax.servlet-api-version>
     <jboss-servlet-api_4.0_spec-version>2.0.0.Final</jboss-servlet-api_4.0_spec-version>
-    <version.log4j>2.15.0</version.log4j>
+    <version.log4j>2.16.0</version.log4j>
     <version.io.undertow>2.0.23.Final</version.io.undertow>  <!-- still need?? -->
     <version.eclipse.jdt>3.5.0</version.eclipse.jdt>  <!-- still need?? -->
     <version.org.jboss.resteasy.tracing.api>1.0.0.Beta4</version.org.jboss.resteasy.tracing.api>
